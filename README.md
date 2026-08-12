@@ -1,17 +1,4 @@
-<div align="center">
-
 # sql-guardrails — Make LLM-generated SQL safe to execute
-
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white)](https://python.org)
-[![sqlglot](https://img.shields.io/badge/sqlglot-26+-1F3A8A)](https://github.com/tobymao/sqlglot)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15+-4169E1?logo=postgresql&logoColor=white)](https://postgresql.org)
-[![Status](https://img.shields.io/badge/Status-Design%20spec-yellow)](#)
-[![Tested](https://img.shields.io/badge/Red--team-150%2B%20adversarial%20cases-059669)](#eval)
-
-</div>
-
----
 
 > A small library that takes LLM-generated SQL, parses it, and rejects anything destructive, expensive, or out-of-allowlist. Use it in front of any "natural language to SQL" pipeline.
 
