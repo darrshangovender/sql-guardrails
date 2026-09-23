@@ -1,0 +1,48 @@
+[project]
+name = "sql-guardrails"
+version = "0.1.0"
+description = "Parse LLM-generated SQL and reject anything destructive, expensive, or outside the allow-list."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Darrshan Govender", email = "darrshangovender@gmail.com" }]
+keywords = ["sql", "llm", "guardrails", "text-to-sql", "sqlglot", "security"]
+
+# sqlglot is the only runtime dependency: every AST check, dialect
+# normalisation, and multi-statement split goes through it. Database drivers
+# are deliberately *not* dependencies — Executor accepts any DB-API 2.0
+# connection the caller already has (sqlite3 from the stdlib in the tests).
+dependencies = [
+    "sqlglot>=25.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=4.1",
+    "ruff>=0.6",
+]
+
+[project.urls]
+Homepage = "https://github.com/darrshangovender/sql-guardrails"
+Issues = "https://github.com/darrshangovender/sql-guardrails/issues"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+# Stated explicitly rather than inferred: the distribution name is hyphenated
+# while the import package is underscored, and relying on hatchling's guess
+# has broken builds elsewhere in this portfolio.
+[tool.hatch.build.targets.wheel]
+packages = ["sql_guardrails"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-ra -q"
+pythonpath = ["."]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
