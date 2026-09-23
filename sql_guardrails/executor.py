@@ -133,4 +133,4 @@ class Executor:
             timer.start()
 
 
-__all__ = ["Executor", "ExecutionResult"]
+__all__ = ["ExecutionResult", "Executor"]
