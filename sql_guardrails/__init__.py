@@ -43,7 +43,7 @@ from .function_allowlist import (
 
 __version__ = "0.1.0"
 
-__all__ = [
+__all__ = [  # noqa: RUF022  grouped by subsystem on purpose; sorting would strip the section comments
     "__version__",
     # Core
     "Guard",
