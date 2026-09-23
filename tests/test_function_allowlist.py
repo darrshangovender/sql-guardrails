@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from dataclasses import FrozenInstanceError
+
 import pytest
 
 from sql_guardrails import ALWAYS_BLOCKED_FUNCTIONS, DEFAULT_SAFE_FUNCTIONS, AllowList
@@ -64,7 +66,7 @@ def test_blocked_set_is_extensible() -> None:
 def test_immutable_after_construction() -> None:
     # AllowList is a frozen dataclass; mutation should fail.
     al = AllowList()
-    with pytest.raises(Exception):
+    with pytest.raises(FrozenInstanceError):
         al.allowed = frozenset({"FOO"})  # type: ignore[misc]
 
 
