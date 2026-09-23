@@ -114,7 +114,7 @@ class AllowList:
             return False
         return name in self.effective_allowed
 
-    def extend(self, more: Iterable[str]) -> "AllowList":
+    def extend(self, more: Iterable[str]) -> AllowList:
         """Return a new allow-list with extra functions permitted."""
         return AllowList(
             allowed=frozenset(self.allowed | {s.upper() for s in more}),
@@ -124,7 +124,7 @@ class AllowList:
 
 
 __all__ = [
-    "AllowList",
-    "DEFAULT_SAFE_FUNCTIONS",
     "ALWAYS_BLOCKED_FUNCTIONS",
+    "DEFAULT_SAFE_FUNCTIONS",
+    "AllowList",
 ]
