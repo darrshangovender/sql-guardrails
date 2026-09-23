@@ -31,8 +31,10 @@ SAFE_QUERIES: list[str] = [
     "SELECT u.id, o.total FROM users u JOIN orders o ON u.id = o.user_id",
     "SELECT u.id, o.total FROM users u LEFT JOIN orders o ON u.id = o.user_id",
     "SELECT id FROM users WHERE id IN (SELECT user_id FROM orders)",
-    "WITH recent AS (SELECT * FROM events WHERE created_at > NOW() - INTERVAL '7 days') "
-    "SELECT user_id, COUNT(*) FROM recent GROUP BY user_id",
+    (
+        "WITH recent AS (SELECT * FROM events WHERE created_at > NOW() - INTERVAL '7 days') "
+        "SELECT user_id, COUNT(*) FROM recent GROUP BY user_id"
+    ),
     "SELECT user_id, RANK() OVER (PARTITION BY day ORDER BY revenue DESC) FROM daily_stats",
     "SELECT DATE_TRUNC('month', created_at) AS m, SUM(amount) FROM orders GROUP BY m",
     "(SELECT id FROM users) UNION (SELECT id FROM admins)",
@@ -262,3 +264,31 @@ def test_join_count_does_not_block_legitimate_analytics() -> None:
         "JOIN d5 ON f.d5 = d5.id"
     )
     assert Guard().check(sql).safe is True
+
+
+# --- write operations that hide inside a SELECT subtree ----------------------
+
+def test_select_into_is_rejected():
+    """`SELECT ... INTO t` is CREATE TABLE AS in disguise. sqlglot parses it as
+    an exp.Select with an `into` arg, so the read-only root check passed it and
+    a read-only guard authorised a table write."""
+    with pytest.raises(DisallowedStatementError):
+        Guard().check_or_raise("SELECT * INTO stolen FROM users")
+    assert not Guard().check("SELECT * INTO stolen FROM users").safe
+
+
+def test_select_into_inside_a_cte_is_rejected():
+    sql = "WITH c AS (SELECT id FROM users) SELECT * INTO copy FROM c"
+    assert not Guard().check(sql).safe
+
+
+def test_select_for_update_is_rejected():
+    """FOR UPDATE takes row locks for the length of the transaction — the module
+    docstring lists lock statements as rejected, but exp.Lock is a Select child."""
+    assert not Guard().check("SELECT * FROM orders FOR UPDATE").safe
+    assert not Guard().check("SELECT * FROM orders FOR SHARE").safe
+
+
+def test_plain_selects_still_pass():
+    assert Guard().check("SELECT id, name FROM users WHERE id = 1").safe
+    assert Guard().check("WITH c AS (SELECT id FROM users) SELECT * FROM c").safe
