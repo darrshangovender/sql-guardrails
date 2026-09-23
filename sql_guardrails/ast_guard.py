@@ -60,6 +60,10 @@ _FORBIDDEN_NODE_TYPES: tuple[type[exp.Expression], ...] = (
     exp.Merge,
     # DDL
     exp.Create,
+    # `SELECT ... INTO new_table` creates and populates a table, but sqlglot
+    # parses it as an exp.Select carrying an `into` arg — not an exp.Create — so
+    # the read-only root check waves it through. It has to be named explicitly.
+    exp.Into,
     exp.Drop,
     exp.Alter,
     exp.AlterColumn,
@@ -74,6 +78,10 @@ _FORBIDDEN_NODE_TYPES: tuple[type[exp.Expression], ...] = (
     exp.Set,
     exp.SetItem,
     exp.Use,
+    # `SELECT ... FOR UPDATE` / `FOR SHARE` takes row locks on every matched row
+    # and holds them for the transaction. Also an exp.Select subtree, so likewise
+    # invisible to the root check.
+    exp.Lock,
 )
 
 # Pretty names for error messages.
@@ -83,6 +91,7 @@ _NODE_TYPE_LABELS: dict[type[exp.Expression], str] = {
     exp.Delete: "DELETE",
     exp.Merge: "MERGE",
     exp.Create: "CREATE",
+    exp.Into: "SELECT INTO",
     exp.Drop: "DROP",
     exp.Alter: "ALTER",
     exp.AlterColumn: "ALTER COLUMN",
@@ -96,6 +105,7 @@ _NODE_TYPE_LABELS: dict[type[exp.Expression], str] = {
     exp.Set: "SET",
     exp.SetItem: "SET",
     exp.Use: "USE",
+    exp.Lock: "SELECT ... FOR UPDATE/SHARE",
 }
 
 # Schemas we always block reads against. ``pg_catalog`` and ``pg_*`` are
@@ -283,7 +293,7 @@ class Guard:
         if callable(sql_name):
             try:
                 return sql_name()
-            except Exception:  # pragma: no cover - defensive
+            except Exception:  # noqa: BLE001, S110  pragma: no cover - defensive probe of sqlglot API
                 pass
         return type(func).__name__.upper()
 
