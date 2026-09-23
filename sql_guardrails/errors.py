@@ -67,12 +67,12 @@ class RowLimitExceeded(GuardError):
 
 
 __all__ = [
-    "GuardError",
-    "ParseError",
-    "MultiStatementError",
-    "DisallowedStatementError",
-    "DisallowedFunctionError",
-    "DisallowedTableError",
     "CostLimitExceeded",
+    "DisallowedFunctionError",
+    "DisallowedStatementError",
+    "DisallowedTableError",
+    "GuardError",
+    "MultiStatementError",
+    "ParseError",
     "RowLimitExceeded",
 ]
